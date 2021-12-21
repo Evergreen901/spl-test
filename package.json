@@ -1,0 +1,17 @@
+{
+  "name": "nodereact",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Avanthika",
+  "license": "ISC",
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.31.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  }
+}
