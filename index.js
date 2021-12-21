@@ -44,16 +44,17 @@ async function createMint (res) {
     res.send('amount: 10000, mint.publicKey: ' + mint.publicKey);
   } catch (e) {
     console.log(e);
+    res.send('Error occurred');
   }
 }
 
-async function send (res, wallet, amount) {
+async function send (res, token, wallet, amount) {
   // Connect to cluster
   var connection = new web3.Connection(web3.clusterApiUrl("devnet"));
   var fromWallet = web3.Keypair.fromSecretKey(DEMO_WALLET_SECRET_KEY);
   
   try {
-    var myMint = new web3.PublicKey("GUs5RbjcMDmwTsJjTaSah3mRK11WZJ5hp9FiAgxiw7VF");
+    var myMint = new web3.PublicKey(token);
     var myToken = new splToken.Token(
       connection,
       myMint,
@@ -91,6 +92,7 @@ async function send (res, wallet, amount) {
     res.send('Successfully sent');
   } catch (e) {
     console.log(e);
+    res.send('Error occurred');
   }
 }
 
@@ -99,14 +101,16 @@ app.get('/mint', (req, res) => {
 })
 
 app.get('/send', (req, res) => {
+  const token = req.query.token;
   const wallet = req.query.wallet;
   const amount = req.query.amount;
-  if (!wallet || !amount) {
+
+  if (!token || !wallet || !amount) {
     res.send('Wallet address or amount is null!');
     return;
   }
 
-  send(res, wallet, amount);
+  send(res, token, wallet, amount);
 })
 
 app.listen(port, () => {
