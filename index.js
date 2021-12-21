@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const port = 3000
-
+const db = require('./db')
 const web3 = require('@solana/web3.js')
 const splToken = require('@solana/spl-token')
 const DEMO_WALLET_SECRET_KEY = new Uint8Array([83,202,109,195,207,211,30,252,197,120,11,36,53,171,207,215,124,198,90,53,78,125,49,172,216,236,16,44,4,162,226,136,253,88,137,177,196,249,175,45,18,53,61,194,187,236,11,147,166,141,77,198,193,207,214,155,242,189,212,153,40,122,237,13]);
@@ -17,7 +17,7 @@ async function createMint (res) {
       fromWallet,
       fromWallet.publicKey,
       null,
-      9,
+      0,
       splToken.TOKEN_PROGRAM_ID
     );
 
@@ -29,7 +29,7 @@ async function createMint (res) {
       fromTokenAccount.address,
       fromWallet.publicKey,
       [],
-      10000 * (10 ** 9)
+      10000 * (10 ** 0)
     );
 
     await mint.setAuthority(
@@ -40,7 +40,7 @@ async function createMint (res) {
       []
     );
 
-    console.log(mint.publicKey)
+    console.log('amount: 10000, mint.publicKey: ' + mint.publicKey);
     res.send('amount: 10000, mint.publicKey: ' + mint.publicKey);
   } catch (e) {
     console.log(e);
@@ -78,9 +78,10 @@ async function send (res, token, wallet, amount) {
           toTokenAccount.address,
           fromWallet.publicKey,
           [],
-          amount * (10 ** 9)
+          amount * (10 ** 0)
         )
       );
+
     // Sign transaction, broadcast, and confirm
     var signature = await web3.sendAndConfirmTransaction(
       connection,
@@ -88,8 +89,10 @@ async function send (res, token, wallet, amount) {
       [fromWallet]
     );
 
+    db.addHistory(wallet, token, amount)
     console.log('wallet: ' + wallet + ' amount: ' + amount + ' signature: ' + signature);
-    res.send('Successfully sent');
+    
+    res.send('Successfully sent');    
   } catch (e) {
     console.log(e);
     res.send('Error occurred');
@@ -111,6 +114,18 @@ app.get('/send', (req, res) => {
   }
 
   send(res, token, wallet, amount);
+})
+
+app.get('/get', async (req, res) => {
+  const wallet = req.query.wallet;
+
+  if (!wallet) {
+    res.send('Wallet address is null!');
+    return;
+  }
+
+  const result = await db.getHistory(wallet);
+  res.send(result);
 })
 
 app.listen(port, () => {
